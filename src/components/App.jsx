@@ -7,10 +7,10 @@ export default React.createClass({
 
 	render() {
 		return (
-			<section className="container">
+			<main className='main container' role='main'>
 				<h1>FLUX/React.js movie rating app</h1>
 				<MovieList />
-			</section>
+			</main>
 		)
 	}
 
