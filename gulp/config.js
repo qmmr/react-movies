@@ -10,7 +10,7 @@ module.exports = {
 		bundleConfigs: [
 			{
 				// Specify the entry point of your app
-				entries: src + '/App.jsx',
+				entries: src + '/app.js',
 				dest: dest + '/js',
 				outputName: 'bundle.js',
 				// cache: {},
