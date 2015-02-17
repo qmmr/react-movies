@@ -76,4 +76,8 @@ export default class MovieStore extends EventEmitter {
 	removeMovie(data) {
 		console.log('removeMovie', data)
 	}
+
+	queryMovie(data) {
+		console.log('queryMovie', data)
+	}
 }

@@ -1,6 +1,7 @@
 import React from 'react'
 import Search from './Search.jsx'
 import context from '../context'
+import Actions from '../actions/ActionCreators'
 
 var movieStore = context.get('movieStore')
 
@@ -13,6 +14,10 @@ export default React.createClass({
 			items: movieStore.getMovies(),
 			query: ''
 		}
+	},
+
+	componentWillMount() {
+		movieStore.addChangeListener(this._onMovieStoreChange)
 	},
 
 	getTitle(query) {
@@ -29,6 +34,19 @@ export default React.createClass({
 		})
 	},
 
+	addMovie(e) {
+		e.preventDefault()
+
+		var movie = {
+			Title: "Horrible Bosses 2",
+			Year: "2014",
+			Rated: "R"
+		}
+
+		console.log('%cMARCIN :: MovieList.jsx:45 :: movie', 'background: #222; color: lime', movie)
+		Actions.addMovie({ movie })
+	},
+
 	render() {
 		return (
 			<section className='movie-list col-md-12'>
@@ -36,9 +54,17 @@ export default React.createClass({
 					{ this.getItems() }
 				</ul>
 				<Search getTitle={ this.getTitle } />
+				<button className="btn btn-primary" type="button" onClick={ this.addMovie }>Add movie</button>
 				{ this.showQuery() }
 			</section>
 		)
+	},
+
+	_onMovieStoreChange() {
+		console.log('%cMARCIN :: MovieList.jsx:66 :: _onMovieStoreChange', 'background: #222; color: lime')
+		this.setState({
+			items: movieStore.getMovies()
+		})
 	}
 
 })

@@ -17,18 +17,25 @@ var mainContext = iniettore.create(function (map) {
 var appDispatcher = mainContext.get('appDispatcher')
 var movieStore = mainContext.get('movieStore')
 
-appDispatcher.register(function({ action: { paylod: action } }) {
-	console.log('appDispatcher.register')
+appDispatcher.register(function(payload) {
+	var source = payload.source
+	var type = payload.action.type
+	var data = payload.action.data
+
+	console.log('appDispatcher.register', type, data)
+
 	switch(type) {
 		case ADD_MOVIE:
-			movieStore.prevStep(action.data)
+			movieStore.addMovie(data)
 			break
 		case REMOVE_MOVIE:
-			movieStore.nextStep(action.data)
+			movieStore.removeMovie(data)
 			break
 	}
 
 	movieStore.emitChange()
+
+	return true
 })
 
 export default mainContext
