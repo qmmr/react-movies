@@ -1,5 +1,8 @@
 import React from 'react'
 import Search from './Search.jsx'
+import context from '../context'
+
+var movieStore = context.get('movieStore')
 
 export default React.createClass({
 
@@ -7,7 +10,7 @@ export default React.createClass({
 
 	getInitialState() {
 		return {
-			items: [ 'Gone Girl', 'Nightcrawler', 'Fury' ],
+			items: movieStore.getMovies(),
 			query: ''
 		}
 	},

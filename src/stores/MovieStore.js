@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events'
+import { CHANGE_EVENT } from '../constants/routingTypes'
 
 export default class MovieStore extends EventEmitter {
 	constructor() {
