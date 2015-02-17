@@ -12,7 +12,8 @@ export default React.createClass({
 	getInitialState() {
 		return {
 			items: movieStore.getMovies(),
-			query: ''
+			query: '',
+			foundMovie: null
 		}
 	},
 
@@ -20,12 +21,16 @@ export default React.createClass({
 		movieStore.addChangeListener(this._onMovieStoreChange)
 	},
 
+	searchQuery(query) {
+		Actions.queryMovie(query)
+	},
+
 	getTitle(query) {
 		this.setState({ query })
 	},
 
-	showQuery() {
-		return this.state.query ? <h1>{ this.state.query }</h1> : null
+	showFoundMovie() {
+		return this.state.foundMovie ? <h1>{ this.state.foundMovie.Title }</h1> : null
 	},
 
 	getItems() {
@@ -53,9 +58,9 @@ export default React.createClass({
 				<ul>
 					{ this.getItems() }
 				</ul>
-				<Search getTitle={ this.getTitle } />
+				<Search searchQuery={ this.searchQuery } />
 				<button className="btn btn-primary" type="button" onClick={ this.addMovie }>Add movie</button>
-				{ this.showQuery() }
+				{ this.showFoundMovie() }
 			</section>
 		)
 	},
@@ -63,7 +68,8 @@ export default React.createClass({
 	_onMovieStoreChange() {
 		console.log('%cMARCIN :: MovieList.jsx:66 :: _onMovieStoreChange', 'background: #222; color: lime')
 		this.setState({
-			items: movieStore.getMovies()
+			items: movieStore.getMovies(),
+			foundMovie: movieStore.getFoundMovie()
 		})
 	}
 

@@ -1,8 +1,10 @@
 import { EventEmitter } from 'events'
 import { CHANGE_EVENT } from '../constants/routingTypes'
+import request from 'superagent'
 
 export default class MovieStore extends EventEmitter {
 	constructor() {
+		this._OMDBI_URL = 'http://www.omdbapi.com/'
 		this._movies = [
 			{
 				Title: "Horrible Bosses 2",
@@ -49,6 +51,7 @@ export default class MovieStore extends EventEmitter {
 				Response: "True"
 			}
 		]
+		this._foundMovie = null
 
 		super()
 	}
@@ -69,6 +72,10 @@ export default class MovieStore extends EventEmitter {
 		return this._movies
 	}
 
+	getFoundMovie() {
+		return this._foundMovie
+	}
+
 	addMovie(data) {
 		console.log('addMovie', data)
 	}
@@ -78,6 +85,12 @@ export default class MovieStore extends EventEmitter {
 	}
 
 	queryMovie(data) {
-		console.log('queryMovie', data)
+		console.log('queryMovie using jQuery?', data)
+		this._lastRequest = request.get(this._OMDBI_URL)
+			.query({ t: data, plot: 'short', r: 'json' })
+			.end((resp) => {
+				console.log('MARCIN :: resp data ::', resp)
+				this._foundMovie = JSON.parse(resp.text)
+			})
 	}
 }

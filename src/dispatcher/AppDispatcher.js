@@ -1,7 +1,7 @@
 import Dispatcher from 'flux/lib/Dispatcher'
 import { SERVER_ACTION, VIEW_ACTION } from '../constants/sourceTypes'
 
-class AppDispatcher extends Dispatcher {
+export default class AppDispatcher extends Dispatcher {
 	constructor() {
 		super()
 	}
@@ -14,5 +14,3 @@ class AppDispatcher extends Dispatcher {
 		this.dispatch({ source: SERVER_ACTION, action })
 	}
 }
-
-export default AppDispatcher

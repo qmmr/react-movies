@@ -12,8 +12,7 @@ export default React.createClass({
 		e.preventDefault()
 		let query = this.refs.search.getDOMNode().value.trim()
 
-		Actions.queryMovie(query)
-		this.props.getTitle(query)
+		this.props.searchQuery(query)
 	},
 
 	render() {

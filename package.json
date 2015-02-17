@@ -16,7 +16,8 @@
     "flux": "^2.0.1",
     "iniettore": "^2.0.0-pre",
     "object-assign": "^2.0.0",
-    "react": "^0.12.2"
+    "react": "^0.12.2",
+    "superagent": "^0.21.0"
   },
   "devDependencies": {
     "6to5ify": "^3.1.2",

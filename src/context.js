@@ -1,7 +1,7 @@
 import iniettore from 'iniettore'
 import { VALUE, LAZY, PROVIDER, SINGLETON, CONSTRUCTOR } from 'iniettore'
 
-import { ADD_MOVIE, REMOVE_MOVIE } from './constants/actionTypes'
+import { ADD_MOVIE, REMOVE_MOVIE, QUERY_MOVIE } from './constants/actionTypes'
 import { CHANGE_EVENT } from './constants/routingTypes'
 
 import AppDispatcher from './dispatcher/AppDispatcher'
@@ -17,12 +17,8 @@ var mainContext = iniettore.create(function (map) {
 var appDispatcher = mainContext.get('appDispatcher')
 var movieStore = mainContext.get('movieStore')
 
-appDispatcher.register(function(payload) {
-	var source = payload.source
-	var type = payload.action.type
-	var data = payload.action.data
-
-	console.log('appDispatcher.register', type, data)
+appDispatcher.register(function({ source, action: { type, data } }) {
+	console.log('appDispatcher.register', source, type, data)
 
 	switch(type) {
 		case ADD_MOVIE:
@@ -30,6 +26,9 @@ appDispatcher.register(function(payload) {
 			break
 		case REMOVE_MOVIE:
 			movieStore.removeMovie(data)
+			break
+		case QUERY_MOVIE:
+			movieStore.queryMovie(data)
 			break
 	}
 
