@@ -1,0 +1,59 @@
+{
+    "esnext": true,
+    "esprima": "esprima-fb",
+    "fileExtensions": [".js", ".jsx"],
+    "maximumLineLength": {
+        "value": 120,
+        "allowComments": true,
+        "allowRegex": true
+    },
+    "disallowKeywords": ["with"],
+    "disallowKeywordsOnNewLine": ["else"],
+    "disallowMixedSpacesAndTabs": true,
+    "disallowNewlineBeforeBlockStatements": true,
+    "disallowSpaceAfterPrefixUnaryOperators": ["++", "--", "+", "-", "~", "!"],
+
+    "disallowTrailingComma": true,
+    "disallowTrailingWhitespace": true,
+    "disallowSemicolons": true,
+    "disallowSpacesInsideParentheses": true,
+
+    "requireBlocksOnNewline": true,
+    "requireSpaceAfterKeywords": [
+        "if",
+        "else",
+        "for",
+        "while",
+        "do",
+        "switch",
+        "return",
+        "try",
+        "catch"
+    ],
+    "requireSpaceBeforeBinaryOperators": [
+        "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", ">>>=",
+        "&=", "|=", "^=", "+=",
+
+        "+", "-", "*", "/", "%", "<<", ">>", ">>>", "&",
+        "|", "^", "&&", "||", "===", "==", ">=",
+        "<=", "<", ">", "!=", "!=="
+    ],
+    "requireSpaceAfterBinaryOperators": true,
+    "requireCamelCaseOrUpperCaseIdentifiers": true,
+    "requireCommaBeforeLineBreak": true,
+    "requireOperatorBeforeLineBreak": [ "?", "=", "+", "-", "/", "*", "==", "===", "!=", "!==", ">", ">=", "<", "<="],
+    "requireParenthesesAroundIIFE": true,
+    "requireSpacesInsideArrayBrackets": "all",
+    "requireSpacesInsideObjectBrackets": "all",
+    "requireLineFeedAtFileEnd": true,
+    "validateIndentation": "\t",
+    "validateLineBreaks": "LF",
+    "validateQuoteMarks": "'",
+    "excludeFiles": [
+        "node_modules/**",
+        ".tmp/**",
+        "public/**/**",
+        "test/fixtures/**",
+        "coverage/**"
+    ]
+}

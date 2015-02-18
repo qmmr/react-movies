@@ -1,5 +1,12 @@
 import React from 'react'
+
+import context from '../context'
+import Actions from '../actions/ActionCreators'
+
 import Search from './Search.jsx'
+import MovieInfo from './MovieInfo.jsx'
+
+var movieStore = context.get('movieStore')
 
 export default React.createClass({
 
@@ -7,23 +14,38 @@ export default React.createClass({
 
 	getInitialState() {
 		return {
-			items: [ 'Gone Girl', 'Nightcrawler', 'Fury' ],
-			query: ''
+			movies: [],
+			query: '',
+			movie: null
 		}
+	},
+
+	componentWillMount() {
+		movieStore.addChangeListener(this._onMovieStoreChange)
+	},
+
+	searchQuery(query) {
+		Actions.queryMovie(query)
 	},
 
 	getTitle(query) {
 		this.setState({ query })
 	},
 
-	showQuery() {
-		return this.state.query ? <h1>{ this.state.query }</h1> : null
+	showFoundMovie() {
+		return this.state.movie ? <h1>{ this.state.movie.Title }</h1> : null
 	},
 
 	getItems() {
-		return this.state.items.map((item, idx) => {
+		return this.state.movies.map((item, idx) => {
 			return <li key={ idx }>{ item }</li>
 		})
+	},
+
+	addMovie(e) {
+		e.preventDefault()
+
+		Actions.addMovie({ movie })
 	},
 
 	render() {
@@ -32,10 +54,19 @@ export default React.createClass({
 				<ul>
 					{ this.getItems() }
 				</ul>
-				<Search getTitle={ this.getTitle } />
-				{ this.showQuery() }
+				<Search searchQuery={ this.searchQuery } />
+
+				{ this.showFoundMovie() && <MovieInfo movie={ this.state.movie } /> }
 			</section>
 		)
+	},
+
+	_onMovieStoreChange() {
+		console.log('%cMARCIN :: MovieList.jsx:66 :: _onMovieStoreChange', 'background: #222; color: lime')
+		this.setState({
+			movies: movieStore.getMovies(),
+			movie: movieStore.getFoundMovie()
+		})
 	}
 
 })

@@ -1,4 +1,5 @@
 import React from 'react'
+import context from '../context'
 
 export default React.createClass({
 
@@ -8,7 +9,8 @@ export default React.createClass({
 		e.preventDefault()
 		let query = this.refs.search.getDOMNode().value.trim()
 
-		this.props.getTitle(query)
+		console.log('submitHandler')
+		this.props.searchQuery(query)
 	},
 
 	render() {
