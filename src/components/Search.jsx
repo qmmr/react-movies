@@ -1,8 +1,5 @@
 import React from 'react'
 import context from '../context'
-import Actions from '../actions/ActionCreators'
-
-var movieStore = context.get('movieStore')
 
 export default React.createClass({
 
@@ -12,6 +9,7 @@ export default React.createClass({
 		e.preventDefault()
 		let query = this.refs.search.getDOMNode().value.trim()
 
+		console.log('submitHandler')
 		this.props.searchQuery(query)
 	},
 

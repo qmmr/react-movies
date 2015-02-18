@@ -32,8 +32,6 @@ appDispatcher.register(function({ source, action: { type, data } }) {
 			break
 	}
 
-	movieStore.emitChange()
-
 	return true
 })
 

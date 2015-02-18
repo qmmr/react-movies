@@ -1,7 +1,10 @@
 import React from 'react'
-import Search from './Search.jsx'
+
 import context from '../context'
 import Actions from '../actions/ActionCreators'
+
+import Search from './Search.jsx'
+import MovieInfo from './MovieInfo.jsx'
 
 var movieStore = context.get('movieStore')
 
@@ -11,9 +14,9 @@ export default React.createClass({
 
 	getInitialState() {
 		return {
-			items: movieStore.getMovies(),
+			movies: [],
 			query: '',
-			foundMovie: null
+			movie: null
 		}
 	},
 
@@ -30,11 +33,11 @@ export default React.createClass({
 	},
 
 	showFoundMovie() {
-		return this.state.foundMovie ? <h1>{ this.state.foundMovie.Title }</h1> : null
+		return this.state.movie ? <h1>{ this.state.movie.Title }</h1> : null
 	},
 
 	getItems() {
-		return this.state.items.map((item, idx) => {
+		return this.state.movies.map((item, idx) => {
 			return <li key={ idx }>{ item }</li>
 		})
 	},
@@ -42,13 +45,6 @@ export default React.createClass({
 	addMovie(e) {
 		e.preventDefault()
 
-		var movie = {
-			Title: "Horrible Bosses 2",
-			Year: "2014",
-			Rated: "R"
-		}
-
-		console.log('%cMARCIN :: MovieList.jsx:45 :: movie', 'background: #222; color: lime', movie)
 		Actions.addMovie({ movie })
 	},
 
@@ -59,8 +55,8 @@ export default React.createClass({
 					{ this.getItems() }
 				</ul>
 				<Search searchQuery={ this.searchQuery } />
-				<button className="btn btn-primary" type="button" onClick={ this.addMovie }>Add movie</button>
-				{ this.showFoundMovie() }
+
+				{ this.showFoundMovie() && <MovieInfo movie={ this.state.movie } /> }
 			</section>
 		)
 	},
@@ -68,8 +64,8 @@ export default React.createClass({
 	_onMovieStoreChange() {
 		console.log('%cMARCIN :: MovieList.jsx:66 :: _onMovieStoreChange', 'background: #222; color: lime')
 		this.setState({
-			items: movieStore.getMovies(),
-			foundMovie: movieStore.getFoundMovie()
+			movies: movieStore.getMovies(),
+			movie: movieStore.getFoundMovie()
 		})
 	}
 
