@@ -82,7 +82,7 @@ var browserifyTask = function(cb, devMode) {
 
 			if (queueLength) {
 				queueLength -= 1
-				if (queueLength == 0) {
+				if (queueLength === 0) {
 					cb()
 				}
 			}

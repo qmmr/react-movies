@@ -110,7 +110,6 @@ export default class MoviesStore extends EventEmitter {
 		let favoriteMovieRef = this._favoriteMoviesFBSvc.push(movie)
 
 		movie.firebaseKey = favoriteMovieRef.key()
-		this._favoriteMovies.forEach((movie) => console.log(movie.Title, movie.firebaseKey))
 		this._foundMovie = null
 
 		this.emitChange()

@@ -2,4 +2,4 @@
 
 var gulp = require('gulp')
 
-gulp.task('build', [ 'css', 'markup' ])
+gulp.task('build', [ 'css', 'markup', 'browserify' ])
