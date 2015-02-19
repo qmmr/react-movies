@@ -5,8 +5,9 @@ import Actions from '../actions/ActionCreators'
 
 import Search from './Search.jsx'
 import MovieInfo from './MovieInfo.jsx'
+import FavoriteMovies from './FavoriteMovies.jsx'
 
-var movieStore = context.get('movieStore')
+var moviesStore = context.get('moviesStore')
 
 export default React.createClass({
 
@@ -23,13 +24,18 @@ export default React.createClass({
 	},
 
 	componentWillMount() {
-		movieStore.addChangeListener(this._onMovieStoreChange)
+		moviesStore.addChangeListener(this._onMoviesStoreChange)
 		this.firebaseRef = new Firebase('https://favorite-movies.firebaseio.com/movies')
 		this.firebaseRef.on('child_added', (dataSnapshot) => {
 			console.log('child_added', dataSnapshot.val())
 			this.movies.push(dataSnapshot.val())
 			this.setState({ movies: this.movies })
 		})
+	},
+
+	addFavoriteMovie(movie) {
+		console.log('MARCIN :: addFavoriteMovie ::', this.state.movie)
+		Actions.addFavoriteMovie(this.state.movie)
 	},
 
 	searchQuery(query) {
@@ -62,24 +68,25 @@ export default React.createClass({
 				<ul>
 					{ this.getItems() }
 				</ul>
+				<FavoriteMovies />
 				<Search searchQuery={ this.searchQuery } />
 
-				{ this.showFoundMovie() && <MovieInfo movie={ this.state.movie } /> }
+				{ this.showFoundMovie() && <MovieInfo addFavoriteMovie={ this.addFavoriteMovie } /> }
 			</section>
 		)
 	},
 
-	_onMovieStoreChange() {
-		let movie = movieStore.getFoundMovie()
-		let movies = movieStore.getMovies()
+	_onMoviesStoreChange() {
+		let movie = moviesStore.getFoundMovie()
+		let movies = moviesStore.getMovies()
 
 		console.log('%cMARCIN :: MovieList.jsx:66 :: _onMovieStoreChange::movie', 'background: #222; color: lime', movie)
 		// set state
 		this.setState({ movies, movie })
 		// and push found movie to firebase
-		if (movie) {
-			this.firebaseRef.push(movie)
-		}
+		// if (movie) {
+		// 	this.firebaseRef.push(movie)
+		// }
 	}
 
 })

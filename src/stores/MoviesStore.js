@@ -32,22 +32,25 @@ export default class MovieStore extends EventEmitter {
 		return this._foundMovie
 	}
 
-	addMovie(data) {
-		console.log('addMovie', data)
-	}
-
-	removeMovie(data) {
-		console.log('removeMovie', data)
-	}
-
 	queryMovie(data) {
 		console.log('queryMovie using jQuery?', data)
 		this._lastRequest = request.get(this._OMDBI_URL)
 			.query({ t: data, plot: 'short', r: 'json' })
-			.end((resp) => {
-				console.log('MARCIN :: resp data ::', resp)
-				this._foundMovie = JSON.parse(resp.text)
-				this.emitChange()
-			})
+			.end((resp) => this._addMovie(resp.text))
 	}
+
+	_addMovie(data) {
+		if (typeof data === 'string') {
+			data = JSON.parse(data)
+		}
+
+		console.log('addMovie', data)
+		this._foundMovie = data
+		this.emitChange()
+	}
+
+	_removeMovie(data) {
+		console.log('removeMovie', data)
+	}
+
 }
