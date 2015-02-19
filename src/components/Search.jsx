@@ -1,27 +1,52 @@
 import React from 'react'
-import context from '../context'
+import contextMixin from '../mixins/contextMixin'
 
 export default React.createClass({
 
 	displayName: 'Search',
 
+	mixins: [ contextMixin ],
+
+	getInitialState() {
+		return {
+			query: ''
+		}
+	},
+
 	submitHandler(e) {
 		e.preventDefault()
-		let query = this.refs.search.getDOMNode().value.trim()
 
 		console.log('submitHandler')
-		this.props.searchQuery(query)
+		console.log('%cMARCIN :: Search.jsx:44 :: submitHandler', 'background: #222; color: lime', this.state.query.trim())
+		this.actions.queryMovie(this.state.query.trim())
+		this.setState({ query: '' })
 	},
 
 	render() {
 		return (
-			<form className='form-inline' role='search' onSubmit={ this.submitHandler }>
-				<div className='form-group'>
-					<input ref='search' type='text' className='form-control' placeholder='Search' />
-				</div>
-				<button type='submit' className='btn btn-default'>Submit</button>
-			</form>
+			<section className="search">
+				<form className='' role='search' onSubmit={ this.submitHandler }>
+					<div className="input-group">
+						<input
+							ref='search'
+							type='text'
+							className='form-control'
+							placeholder='Search for a movie...'
+							onChange={ this._updateQuery }
+							value={ this.state.query } />
+						<span className='input-group-btn'>
+							<button className='btn btn-primary' type='submit'>Search</button>
+						</span>
+					</div>
+				</form>
+			</section>
 		)
+	},
+
+	_updateQuery(e) {
+		e.preventDefault()
+
+		this.setState({ query: this.refs.search.getDOMNode().value })
 	}
 
 })

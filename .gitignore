@@ -78,6 +78,8 @@ $RECYCLE.BIN/
 !.gitignore
 !.atom
 !.jscsrc*
+!.jshintrc
+!.jsxhintrc
 *~
 
 # Node.js, bower etc
