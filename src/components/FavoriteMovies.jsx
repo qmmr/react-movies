@@ -1,35 +1,32 @@
-'use strict'
-
 import React from 'react'
-
-import context from '../context'
-import Actions from '../actions/ActionCreators'
-
-var favoriteMoviesStore = context.get('favoriteMoviesStore')
 
 export default React.createClass({
 
 	displayName: 'FavoriteMovies',
 
+	contextTypes: {
+		moviesStore: React.PropTypes.object.isRequired,
+		actions: React.PropTypes.object.isRequired
+	},
+
 	getInitialState() {
 		this.movies = []
 
 		return {
-			movies: [
-				{ Title: 'Foo', Year: '2015' },
-				{ Title: 'Bar', Year: '2015' }
-			]
+			movies: []
 		}
 	},
 
 	componentWillMount() {
-		favoriteMoviesStore.addChangeListener(this._onFavoriteMoviesStoreChange)
-		this.firebaseRef = new Firebase('https://favorite-movies.firebaseio.com/favorite-movies')
-		this.firebaseRef.on('child_added', (dataSnapshot) => {
-			console.log('child_added', dataSnapshot.val())
-			this.movies.push(dataSnapshot.val())
-			this.setState({ movies: this.movies })
-		})
+		this.context.moviesStore.addChangeListener(this._onMoviesStoreChange)
+
+		// this.firebaseRef = new Firebase('https://favorite-movies.firebaseio.com/favorite-movies')
+		// this.firebaseRef.on('child_added', (dataSnapshot) => {
+		// 	console.log('child_added', dataSnapshot.val())
+		// 	this.movies.push(dataSnapshot.val())
+		// 	this.setState({ movies: this.movies })
+		// })
+
 	},
 
 	render() {
@@ -39,26 +36,77 @@ export default React.createClass({
 				<header className='panel-heading'>
 					<h1>Favorite Movies</h1>
 				</header>
-				<div className='panel-body'>
-					<p>Films you love</p>
-				</div>
 
-				<ul className='list-group'>
-					{ this._getListItems() }
-				</ul>
+				<div className='panel-body'>
+					{ this._getList() }
+				</div>
 
 			</div>
 		)
 	},
 
-	_getListItems() {
-		return this.state.movies.map(({ Title }, idx) => {
-			return <li key={ idx } className='list-group-item'>{ Title }</li>
-		})
+	_getSpinner() {
+		return <span>Loading...</span>
 	},
 
-	_onFavoriteMoviesStoreChange() {
-		console.log('MARCIN :: _onFavoriteMoviesStoreChange ::', favoriteMoviesStore.getMovies())
+	_getList() {
+		return (
+			<ul className='list-group'>
+				{ this._getListItems() }
+			</ul>
+		)
+	},
+
+	_getListItems() {
+		let items = this.state.movies.map((movie, idx) => {
+			var { Title, Year } = movie
+
+			return (
+				<li key={ idx } className='list-group-item'>
+					{ Title }:{ Year }
+					{ this._createRemoveButton(idx) }
+				</li>
+			)
+		})
+
+		return items
+	},
+
+	// _createRemoveButton(idx) {
+	// 	var _removeFromFavoriteMovies = () => Actions.removeFavoriteMovie(idx)
+
+	// 	return (
+	// 		<button className='btn btn-danger btn-xs pull-right' type='button' onClick={ _removeFromFavoriteMovies }>
+	// 			<span className='glyphicon glyphicon-remove'></span>
+	// 		</button>
+	// 	)
+	// },
+
+	// _removeFromFavoriteMovies(e) {
+	// 	e.preventDefault()
+
+	// 	console.log('%cMARCIN :: FavoriteMovies.jsx:79 :: movie', 'background: #222; color: lime')
+
+	// 	// return false
+	// },
+
+	_onMoviesStoreChange() {
+		let movie = this.context.moviesStore.getFoundMovie()
+		let movies = this.context.moviesStore.getFavoriteMovies()
+
+		// this.setState({ movies })
+
+		// if (movie && typeof movie.Error === 'undefined') {
+		// 	this.firebaseRef.push(movie)
+		// 	console.log('MARCIN :: FavoriteMovies#_onFavoriteMoviesStoreChange :: movie', movie)
+		// }
+		if (movie) {
+			console.log('MARCIN :: FavoriteMovies#_onFavoriteMoviesStoreChange :: movie', movie)
+		}
+
+		if (movies) {
+			console.log('MARCIN :: FavoriteMovies#_onFavoriteMoviesStoreChange :: movies', movies)
+		}
 	}
 
 })
