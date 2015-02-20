@@ -1,13 +1,11 @@
 import React from 'react'
+import contextMixin from '../mixins/contextMixin'
 
 export default React.createClass({
 
 	displayName: 'FavoriteMovies',
 
-	contextTypes: {
-		moviesStore: React.PropTypes.object.isRequired,
-		actions: React.PropTypes.object.isRequired
-	},
+	mixins: [ contextMixin ],
 
 	getInitialState() {
 		this.movies = []
@@ -18,7 +16,7 @@ export default React.createClass({
 	},
 
 	componentWillMount() {
-		this.context.moviesStore.addChangeListener(this._onMoviesStoreChange)
+		this.store.addChangeListener(this._onMoviesStoreChange)
 
 		// this.firebaseRef = new Firebase('https://favorite-movies.firebaseio.com/favorite-movies')
 		// this.firebaseRef.on('child_added', (dataSnapshot) => {

@@ -1,13 +1,11 @@
 import React from 'react'
+import contextMixin from '../mixins/contextMixin'
 
 export default React.createClass({
 
 	displayName: 'Search',
 
-	contextTypes: {
-		moviesStore: React.PropTypes.object.isRequired,
-		actions: React.PropTypes.object.isRequired
-	},
+	mixins: [ contextMixin ],
 
 	getInitialState() {
 		return {
@@ -20,7 +18,7 @@ export default React.createClass({
 
 		console.log('submitHandler')
 		console.log('%cMARCIN :: Search.jsx:44 :: submitHandler', 'background: #222; color: lime', this.state.query.trim())
-		this.context.actions.queryMovie(this.state.query.trim())
+		this.actions.queryMovie(this.state.query.trim())
 	},
 
 	render() {

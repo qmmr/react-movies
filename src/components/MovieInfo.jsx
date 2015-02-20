@@ -1,13 +1,11 @@
 import React from 'react'
+import contextMixin from '../mixins/contextMixin'
 
 export default React.createClass({
 
 	displayName: 'MovieInfo',
 
-	contextTypes: {
-		moviesStore: React.PropTypes.object.isRequired,
-		actions: React.PropTypes.object.isRequired
-	},
+	mixins: [ contextMixin ],
 
 	getInitialState() {
 		return {
@@ -16,7 +14,7 @@ export default React.createClass({
 	},
 
 	componentWillMount() {
-		this.context.moviesStore.addChangeListener(this._onMoviesStoreChange)
+		this.store.addChangeListener(this._onMoviesStoreChange)
 	},
 
 	render() {
