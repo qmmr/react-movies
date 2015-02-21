@@ -3,7 +3,7 @@
 var gulp = require('gulp')
 var browserifyTask = require('./browserify')
 
-gulp.task('watchify', function(cb) {
+gulp.task('watchify', [ 'clean' ], function(cb) {
 	// start browserify with devMode
 	browserifyTask(cb, true)
 })
