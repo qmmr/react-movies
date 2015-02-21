@@ -1,4 +1,7 @@
 {
+	"globals": {
+		"Firebase": true
+	},
 	"node": true,
 	"browser": true,
 	"esnext": true,
@@ -15,9 +18,9 @@
 	"noempty": true,
 	"nonbsp": true,
 	"nonew": true,
-	"quotmark": "single",
+	"quotmark": false,
 	"undef": true,
-	"maxlen": 110,
+	"maxlen": 120,
 	"asi": true,
 	"boss": false,
 	"debug": false,

@@ -80,23 +80,8 @@ export default React.createClass({
 		)
 	},
 
-	// _removeFromFavoriteMovies(e) {
-	// 	e.preventDefault()
-
-	// 	console.log('%cMARCIN :: FavoriteMovies.jsx:79 :: movie', 'background: #222; color: lime')
-
-	// 	// return false
-	// },
-
 	_onMoviesStoreChange() {
 		this.setState({ movies: this.store.getFavoriteMovies() })
-
-		// if (movie && typeof movie.Error === 'undefined') {
-		// 	this.firebaseRef.push(movie)
-		// 	console.log('MARCIN :: FavoriteMovies#_onFavoriteMoviesStoreChange :: movie', movie)
-		// }
-		console.log('%cMARCIN :: FavoriteMovies.jsx :: _onMoviesStoreChange -> movie', 'background: #222; color: lime', this.store.getFoundMovie())
-		console.log('%cMARCIN :: FavoriteMovies.jsx :: _onMoviesStoreChange -> movies', 'background: #222; color: lime', this.store.getFavoriteMovies())
 	}
 
 })

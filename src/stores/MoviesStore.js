@@ -11,8 +11,9 @@ import request from 'superagent'
 const CHANGE_EVENT = 'CHANGE_EVENT'
 
 export default class MoviesStore extends EventEmitter {
-	constructor(dispatcher) {
+	constructor(dispatcher, favoriteMoviesFBSvc) {
 		this._dispatchToken = dispatcher.register(this._handleAction.bind(this))
+		this._favoriteMoviesFBSvc = favoriteMoviesFBSvc
 		this._OMDBI_URL = 'http://www.omdbapi.com/'
 		this._foundMovie = null
 		this._favoriteMovies = []
@@ -88,10 +89,14 @@ export default class MoviesStore extends EventEmitter {
 	}
 
 	_addFavoriteMovie(movie) {
-		console.log('%cMARCIN :: MoviesStore.js:81 :: _addFavoriteMovie movie', 'background: #222; color: lime', movie)
+		let favoriteMovieRef = this._favoriteMoviesFBSvc.push(movie)
+
+		movie.firebaseKey = favoriteMovieRef.key()
+		console.log('%cMARCIN :: MoviesStore.js:81 :: _addFavoriteMovie movie', 'background: #222; color: lime', movie.Title, movie.firebaseKey)
 		this._favoriteMovies.push(movie)
-		console.log('%cMARCIN :: MoviesStore.js:81 :: this._favoriteMovies', 'background: #222; color: lime', this._favoriteMovies)
+		this._favoriteMovies.forEach((movie) => console.log(movie.Title, movie.firebaseKey))
 		this._foundMovie = null
+
 		this.emitChange()
 	}
 
