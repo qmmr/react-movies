@@ -2,6 +2,8 @@ import { EventEmitter } from 'events'
 import {
 	ADD_FAVORITE_MOVIE,
 	REMOVE_FAVORITE_MOVIE,
+	ADD_WATCH_LATER_MOVIE,
+	ADD_HATE_MOVIE,
 	QUERY_MOVIE
 } from '../constants/actionTypes'
 import request from 'superagent'
@@ -14,6 +16,8 @@ export default class MoviesStore extends EventEmitter {
 		this._OMDBI_URL = 'http://www.omdbapi.com/'
 		this._foundMovie = null
 		this._favoriteMovies = []
+		this._watchLaterMovies = []
+		this._hateMovies = []
 		this._lastRequest = null
 
 		super()
@@ -41,35 +45,68 @@ export default class MoviesStore extends EventEmitter {
 		return this._favoriteMovies
 	}
 
-	queryMovie(data) {
-		console.log('%cMARCIN :: MoviesStore.js:31 :: queryMovie data', 'background: #222; color: lime', data)
-		this._lastRequest = request.get(this._OMDBI_URL)
-			.query({ t: data, plot: 'short', r: 'json' })
-			.end((resp) => this._addQueriedMovie(resp.text))
-	}
-
 	// private methods
 
 	_handleAction({ source, action: { type, data } }) {
-		console.log('appDispatcher.register', source, type, data)
+		console.log('%cMARCIN :: MoviesStore.js:55 :: _handleAction', 'background: #222; color: lime', source, type, data)
 
-		switch(type) {
+		switch (type) {
 			case ADD_FAVORITE_MOVIE:
 				this._addFavoriteMovie(data)
 				break
+			case ADD_WATCH_LATER_MOVIE:
+				this._addWatchLaterMovie(data)
+				break
+			case ADD_HATE_MOVIE:
+				this._addHateMovie(data)
+				break
 			case REMOVE_FAVORITE_MOVIE:
-				this.removeFavoriteMovie(data)
+				this._removeFavoriteMovie(data)
 				break
 			case QUERY_MOVIE:
-				this.queryMovie(data)
+				this._queryMovie(data)
 				break
 		}
 
 		return true
 	}
 
+	_handleError({ error, status }) {
+		if (error) {
+			console.error(`Oops, sorry :( ${ error.message }`)
+		} else {
+			console.error(`Oops, I got ${ status } response...`)
+		}
+	}
+
+	_queryMovie(data) {
+		// console.log('%cMARCIN :: MoviesStore.js:31 :: _queryMovie data', 'background: #222; color: lime', data)
+		this._lastRequest = request.get(this._OMDBI_URL)
+			.query({ t: data, plot: 'short', r: 'json' })
+			.on('error', this._handleError)
+			.end((resp) => this._addQueriedMovie(resp.text))
+	}
+
 	_addFavoriteMovie(movie) {
+		console.log('%cMARCIN :: MoviesStore.js:81 :: _addFavoriteMovie movie', 'background: #222; color: lime', movie)
 		this._favoriteMovies.push(movie)
+		console.log('%cMARCIN :: MoviesStore.js:81 :: this._favoriteMovies', 'background: #222; color: lime', this._favoriteMovies)
+		this._foundMovie = null
+		this.emitChange()
+	}
+
+	_addWatchLaterMovie(movie) {
+		this._watchLaterMovies.push(movie)
+		this.emitChange()
+	}
+
+	_addHateMovie(movie) {
+		this._hateMovies.push(movie)
+		this.emitChange()
+	}
+
+	_removeFavoriteMovie(idx) {
+		this._favoriteMovies.splice(idx, 1)
 		this.emitChange()
 	}
 
@@ -83,10 +120,4 @@ export default class MoviesStore extends EventEmitter {
 		this.emitChange()
 	}
 
-	// removeMovie(idx) {
-	// 	console.log('%cMARCIN :: FavoriteMoviesStore.js:33 :: idx', 'background: #222; color: lime', idx)
-	// 	console.log('MARCIN :: this._movies ::', this._movies)
-	// 	this._movies = this._movies.filter((movie, idx) => idx !== movie.idx)
-	// 	console.log('MARCIN :: this._movies ::', this._movies)
-	// }
 }
