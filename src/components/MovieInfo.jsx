@@ -48,23 +48,12 @@ export default React.createClass({
 						<span className='glyphicon glyphicon-heart'></span>
 					</button>
 				</div>
-				<div className='btn-group' role='group'>
-					<button type='button' className='btn btn-warning' disabled='disabled' onClick={ this._addToWatchLaterMovies }>
-						<span className='glyphicon glyphicon-time'></span>
-					</button>
-				</div>
-				<div className='btn-group' role='group'>
-					<button type='button' className='btn btn-danger' disabled='disabled' onClick={ this._addToHateMovies }>
-						<span className='glyphicon glyphicon-fire'></span>
-					</button>
-				</div>
 			</div>
 		)
 	},
 
 	_addToFavoriteMovies(e) {
 		e.preventDefault()
-		// console.log('MARCIN :: _addToFavoriteMovies ::', this.state.movie)
 		this.actions.addFavoriteMovie(this.state.movie)
 	},
 

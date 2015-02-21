@@ -21,6 +21,8 @@ export default class MoviesStore extends EventEmitter {
 		this._hateMovies = []
 		this._lastRequest = null
 
+		this._listenToFavoriteMoviesSvc()
+
 		super()
 	}
 
@@ -49,8 +51,6 @@ export default class MoviesStore extends EventEmitter {
 	// private methods
 
 	_handleAction({ source, action: { type, data } }) {
-		console.log('%cMARCIN :: MoviesStore.js:55 :: _handleAction', 'background: #222; color: lime', source, type, data)
-
 		switch (type) {
 			case ADD_FAVORITE_MOVIE:
 				this._addFavoriteMovie(data)
@@ -72,7 +72,21 @@ export default class MoviesStore extends EventEmitter {
 		return true
 	}
 
-	_handleError({ error, status }) {
+	_listenToFavoriteMoviesSvc() {
+		this._favoriteMoviesFBSvc.on('child_added', (dataSnapshot) => {
+			let movie = dataSnapshot.val()
+			movie.firebaseKey = dataSnapshot.key()
+
+			this._favoriteMovies.push(movie)
+			this.emitChange()
+		})
+
+		this._favoriteMoviesFBSvc.on('child_removed', (dataSnapshot) => {
+			this._removeFromFavoriteMovies(dataSnapshot.key())
+		})
+	}
+
+	_handleOMDBIError({ error, status }) {
 		if (error) {
 			console.error(`Oops, sorry :( ${ error.message }`)
 		} else {
@@ -80,11 +94,15 @@ export default class MoviesStore extends EventEmitter {
 		}
 	}
 
+	_removeFromFavoriteMovies(key) {
+		this._favoriteMovies = this._favoriteMovies.filter((movie) => movie.firebaseKey !== key)
+		this.emitChange()
+	}
+
 	_queryMovie(data) {
-		// console.log('%cMARCIN :: MoviesStore.js:31 :: _queryMovie data', 'background: #222; color: lime', data)
 		this._lastRequest = request.get(this._OMDBI_URL)
 			.query({ t: data, plot: 'short', r: 'json' })
-			.on('error', this._handleError)
+			.on('error', this._handleOMDBIError)
 			.end((resp) => this._addQueriedMovie(resp.text))
 	}
 
@@ -92,8 +110,6 @@ export default class MoviesStore extends EventEmitter {
 		let favoriteMovieRef = this._favoriteMoviesFBSvc.push(movie)
 
 		movie.firebaseKey = favoriteMovieRef.key()
-		console.log('%cMARCIN :: MoviesStore.js:81 :: _addFavoriteMovie movie', 'background: #222; color: lime', movie.Title, movie.firebaseKey)
-		this._favoriteMovies.push(movie)
 		this._favoriteMovies.forEach((movie) => console.log(movie.Title, movie.firebaseKey))
 		this._foundMovie = null
 
@@ -101,28 +117,32 @@ export default class MoviesStore extends EventEmitter {
 	}
 
 	_addWatchLaterMovie(movie) {
-		this._watchLaterMovies.push(movie)
-		this.emitChange()
+		// this._watchLaterMovies.push(movie)
+		// this.emitChange()
 	}
 
 	_addHateMovie(movie) {
-		this._hateMovies.push(movie)
-		this.emitChange()
+		// this._hateMovies.push(movie)
+		// this.emitChange()
 	}
 
-	_removeFavoriteMovie(idx) {
-		this._favoriteMovies.splice(idx, 1)
-		this.emitChange()
+	_removeFavoriteMovie(key) {
+		let movieRef = this._favoriteMoviesFBSvc.child(key)
+
+		movieRef.remove((err) => {
+			if (err) {
+				console.error(err)
+			} else {
+				console.log(`movie ${ key } was removed`)
+			}
+		})
 	}
 
 	_addQueriedMovie(data) {
 		if (typeof data === 'string') {
-			data = JSON.parse(data)
+			this._foundMovie = JSON.parse(data)
+			this.emitChange()
 		}
-
-		console.log('_addMovie', data)
-		this._foundMovie = data
-		this.emitChange()
 	}
 
 }

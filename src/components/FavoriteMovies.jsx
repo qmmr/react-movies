@@ -8,23 +8,13 @@ export default React.createClass({
 	mixins: [ contextMixin ],
 
 	getInitialState() {
-		this.movies = []
-
 		return {
-			movies: []
+			movies: this.store.getFavoriteMovies()
 		}
 	},
 
 	componentWillMount() {
 		this.store.addChangeListener(this._onMoviesStoreChange)
-
-		// this.firebaseRef = new Firebase('https://favorite-movies.firebaseio.com/favorite-movies')
-		// this.firebaseRef.on('child_added', (dataSnapshot) => {
-		// 	console.log('child_added', dataSnapshot.val())
-		// 	this.movies.push(dataSnapshot.val())
-		// 	this.setState({ movies: this.movies })
-		// })
-
 	},
 
 	render() {
@@ -56,13 +46,12 @@ export default React.createClass({
 	},
 
 	_getListItems() {
-		let items = this.state.movies.map((movie, idx) => {
-			var { Title, Year } = movie
+		let items = this.state.movies.map(({ Title, Year, firebaseKey: key }, idx) => {
 
 			return (
 				<li key={ idx } className='list-group-item'>
 					{ Title }:{ Year }
-					{ this._createRemoveButton(idx) }
+					{ this._createRemoveButton(key) }
 				</li>
 			)
 		})
@@ -70,8 +59,8 @@ export default React.createClass({
 		return items
 	},
 
-	_createRemoveButton(idx) {
-		var removeFromFavoriteMovies = () => this.actions.removeFavoriteMovie(idx)
+	_createRemoveButton(key) {
+		var removeFromFavoriteMovies = () => this.actions.removeFavoriteMovie(key)
 
 		return (
 			<button className='btn btn-danger btn-xs pull-right' type='button' onClick={ removeFromFavoriteMovies }>
