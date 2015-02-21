@@ -1,4 +1,4 @@
-import Dispatcher from 'flux/lib/Dispatcher'
+import { Dispatcher } from 'flux'
 
 const VIEW_ACTION = 'VIEW_ACTION'
 

@@ -16,8 +16,6 @@ export default React.createClass({
 	submitHandler(e) {
 		e.preventDefault()
 
-		console.log('submitHandler')
-		console.log('%cMARCIN :: Search.jsx:44 :: submitHandler', 'background: #222; color: lime', this.state.query.trim())
 		this.actions.queryMovie(this.state.query.trim())
 		this.setState({ query: '' })
 	},

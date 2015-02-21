@@ -4,7 +4,8 @@
   "description": "FLUX/React.js movie rating app",
   "main": "src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node-modules/.bin/gulp test",
+    "serve": "./node-modules/.bin/gulp serve"
   },
   "repository": {
     "type": "git",
