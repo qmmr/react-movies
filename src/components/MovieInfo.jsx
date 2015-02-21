@@ -49,12 +49,12 @@ export default React.createClass({
 					</button>
 				</div>
 				<div className='btn-group' role='group'>
-					<button type='button' className='btn btn-warning' onClick={ this._addToWatchLaterMovies }>
-						<span className='glyphicon glyphicon-star'></span>
+					<button type='button' className='btn btn-warning' disabled='disabled' onClick={ this._addToWatchLaterMovies }>
+						<span className='glyphicon glyphicon-time'></span>
 					</button>
 				</div>
 				<div className='btn-group' role='group'>
-					<button type='button' className='btn btn-danger' onClick={ this._addToHateMovies }>
+					<button type='button' className='btn btn-danger' disabled='disabled' onClick={ this._addToHateMovies }>
 						<span className='glyphicon glyphicon-fire'></span>
 					</button>
 				</div>
@@ -64,26 +64,24 @@ export default React.createClass({
 
 	_addToFavoriteMovies(e) {
 		e.preventDefault()
-		debugger
-		console.log('MARCIN :: _addToFavoriteMovies ::')
-		this.context.actions.addFavoriteMovie(this.state.movie)
-		// this.setState({ movie: null })
+		// console.log('MARCIN :: _addToFavoriteMovies ::', this.state.movie)
+		this.actions.addFavoriteMovie(this.state.movie)
 	},
 
 	_addToWatchLaterMovies(e) {
 		e.preventDefault()
 		console.log('MARCIN :: _addToWatchLaterMovies ::')
+		this.actions.addWatchLaterMovie(this.state.movie)
 	},
 
 	_addToHateMovies(e) {
 		e.preventDefault()
 		console.log('MARCIN :: _addToHateMovies ::')
+		this.actions.addHateMovie(this.state.movie)
 	},
 
 	_onMoviesStoreChange() {
-		let movie = this.context.moviesStore.getFoundMovie()
-		console.log('MARCIN :: MovieInfo#_onMoviesStoreChange ::', movie)
-		this.setState({ movie })
+		this.setState({ movie: this.store.getFoundMovie() })
 	}
 
 })

@@ -19,6 +19,7 @@ export default React.createClass({
 		console.log('submitHandler')
 		console.log('%cMARCIN :: Search.jsx:44 :: submitHandler', 'background: #222; color: lime', this.state.query.trim())
 		this.actions.queryMovie(this.state.query.trim())
+		this.setState({ query: '' })
 	},
 
 	render() {
@@ -44,10 +45,8 @@ export default React.createClass({
 
 	_updateQuery(e) {
 		e.preventDefault()
-		console.log('MARCIN :: _updateQuery ::')
-		this.setState({
-			query: this.refs.search.getDOMNode().value
-		})
+
+		this.setState({ query: this.refs.search.getDOMNode().value })
 	}
 
 })

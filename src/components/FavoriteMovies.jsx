@@ -70,15 +70,15 @@ export default React.createClass({
 		return items
 	},
 
-	// _createRemoveButton(idx) {
-	// 	var _removeFromFavoriteMovies = () => Actions.removeFavoriteMovie(idx)
+	_createRemoveButton(idx) {
+		var removeFromFavoriteMovies = () => this.actions.removeFavoriteMovie(idx)
 
-	// 	return (
-	// 		<button className='btn btn-danger btn-xs pull-right' type='button' onClick={ _removeFromFavoriteMovies }>
-	// 			<span className='glyphicon glyphicon-remove'></span>
-	// 		</button>
-	// 	)
-	// },
+		return (
+			<button className='btn btn-danger btn-xs pull-right' type='button' onClick={ removeFromFavoriteMovies }>
+				<span className='glyphicon glyphicon-remove'></span>
+			</button>
+		)
+	},
 
 	// _removeFromFavoriteMovies(e) {
 	// 	e.preventDefault()
@@ -89,22 +89,14 @@ export default React.createClass({
 	// },
 
 	_onMoviesStoreChange() {
-		let movie = this.context.moviesStore.getFoundMovie()
-		let movies = this.context.moviesStore.getFavoriteMovies()
-
-		// this.setState({ movies })
+		this.setState({ movies: this.store.getFavoriteMovies() })
 
 		// if (movie && typeof movie.Error === 'undefined') {
 		// 	this.firebaseRef.push(movie)
 		// 	console.log('MARCIN :: FavoriteMovies#_onFavoriteMoviesStoreChange :: movie', movie)
 		// }
-		if (movie) {
-			console.log('MARCIN :: FavoriteMovies#_onFavoriteMoviesStoreChange :: movie', movie)
-		}
-
-		if (movies) {
-			console.log('MARCIN :: FavoriteMovies#_onFavoriteMoviesStoreChange :: movies', movies)
-		}
+		console.log('%cMARCIN :: FavoriteMovies.jsx :: _onMoviesStoreChange -> movie', 'background: #222; color: lime', this.store.getFoundMovie())
+		console.log('%cMARCIN :: FavoriteMovies.jsx :: _onMoviesStoreChange -> movies', 'background: #222; color: lime', this.store.getFavoriteMovies())
 	}
 
 })
