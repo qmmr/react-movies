@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+
+require('../server').listen(
+	process.env.PORT || 8000,
+	process.env.HOST || 'localhost'
+)
