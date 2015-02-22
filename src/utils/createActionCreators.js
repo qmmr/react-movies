@@ -9,10 +9,6 @@ import {
 
 export default function createActionCreators(appDispatcher) {
 	return {
-		addMovie(data) {
-			appDispatcher.handleViewAction({ type: ADD_MOVIE, data })
-		},
-
 		addFavoriteMovie(data) {
 			appDispatcher.handleViewAction({ type: ADD_FAVORITE_MOVIE, data })
 		},
