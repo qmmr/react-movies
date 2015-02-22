@@ -25,9 +25,22 @@ export default React.createClass({
 					<h1>Favorite Movies</h1>
 				</header>
 
-				<div className='panel-body'>
-					{ this._getList() }
-				</div>
+				<table className='table table-hover table-striped'>
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Year</th>
+							<th>Director</th>
+							<th>Actors</th>
+							<th>imdbRating</th>
+							<th>imdbVotes</th>
+							<th className='text-center'><span className='glyphicon glyphicon-remove'></span></th>
+						</tr>
+					</thead>
+					<tbody>
+						{ this._getTableRows() }
+					</tbody>
+				</table>
 
 			</div>
 		)
@@ -37,33 +50,30 @@ export default React.createClass({
 		return <span>Loading...</span>
 	},
 
-	_getList() {
+	_getTableRows() {
 		return (
-			<ul className='list-group'>
-				{ this._getListItems() }
-			</ul>
+			this.state.movies.map((movie, idx) => {
+				let { Title, Director, Actors, Year, firebaseKey, imdbID, imdbRating, imdbVotes } = movie
+				return (
+					<tr key={ idx }>
+						<td><a href={ 'http://www.imdb.com/title/' + imdbID } target='_blank'>{ Title }</a></td>
+						<td>{ Year }</td>
+						<td>{ Director }</td>
+						<td>{ Actors }</td>
+						<td>{ imdbRating }</td>
+						<td>{ imdbVotes }</td>
+						<td className='text-center'>{ this._createRemoveButton(firebaseKey) }</td>
+					</tr>
+				)
+			})
 		)
-	},
-
-	_getListItems() {
-		let items = this.state.movies.map(({ Title, Year, firebaseKey: key }, idx) => {
-
-			return (
-				<li key={ idx } className='list-group-item'>
-					{ Title }:{ Year }
-					{ this._createRemoveButton(key) }
-				</li>
-			)
-		})
-
-		return items
 	},
 
 	_createRemoveButton(key) {
 		var removeFromFavoriteMovies = () => this.actions.removeFavoriteMovie(key)
 
 		return (
-			<button className='btn btn-danger btn-xs pull-right' type='button' onClick={ removeFromFavoriteMovies }>
+			<button className='btn btn-danger btn-xs' type='button' onClick={ removeFromFavoriteMovies }>
 				<span className='glyphicon glyphicon-remove'></span>
 			</button>
 		)

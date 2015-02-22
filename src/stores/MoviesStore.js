@@ -44,8 +44,16 @@ export default class MoviesStore extends EventEmitter {
 		return this._foundMovie
 	}
 
+	hasFoundMovie() {
+		return !!this._foundMovie
+	}
+
 	getFavoriteMovies() {
 		return this._favoriteMovies
+	}
+
+	isLoading() {
+		return this._loading
 	}
 
 	// private methods
@@ -86,24 +94,24 @@ export default class MoviesStore extends EventEmitter {
 		})
 	}
 
-	_handleOMDBIError({ error, status }) {
-		if (error) {
-			console.error(`Oops, sorry :( ${ error.message }`)
-		} else {
-			console.error(`Oops, I got ${ status } response...`)
-		}
-	}
-
 	_removeFromFavoriteMovies(key) {
 		this._favoriteMovies = this._favoriteMovies.filter((movie) => movie.firebaseKey !== key)
 		this.emitChange()
 	}
 
 	_queryMovie(data) {
+		this._loading = true
 		this._lastRequest = request.get(this._OMDBI_URL)
 			.query({ t: data, plot: 'short', r: 'json' })
-			.on('error', this._handleOMDBIError)
+			.on('error', (err) => {
+				if (err) {
+					console.error(`Oops, sorry: ${ err.message }`)
+					this._loading = false
+					this.emitChange()
+				}
+			})
 			.end((resp) => this._addQueriedMovie(resp.text))
+		this.emitChange()
 	}
 
 	_addFavoriteMovie(movie) {
@@ -140,6 +148,7 @@ export default class MoviesStore extends EventEmitter {
 	_addQueriedMovie(data) {
 		if (typeof data === 'string') {
 			this._foundMovie = JSON.parse(data)
+			this._loading = false
 			this.emitChange()
 		}
 	}
