@@ -41,6 +41,17 @@ describe('Given an instance of the MoviesStore', function() {
 		})
 	})
 
+	describe('#hasFoundMovie', function() {
+		it('should return true if the movie was found', function() {
+			moviesStore._foundMovie = MOVIE
+			expect(moviesStore.hasFoundMovie()).to.be.true
+		})
+
+		it('should return false if the movie was NOT found', function() {
+			expect(moviesStore.hasFoundMovie()).to.be.false
+		})
+	})
+
 	describe('and pending ADD_FAVORITE_MOVIE request', function() {
 		before(function() {
 			var action = { type: 'ADD_FAVORITE_MOVIE', MOVIE }
