@@ -9,7 +9,8 @@ export default React.createClass({
 
 	getInitialState() {
 		return {
-			movie: null
+			movie: null,
+			loading: false
 		}
 	},
 
@@ -18,23 +19,31 @@ export default React.createClass({
 	},
 
 	render() {
-		return this.state.movie ? this._getMovieInfo() : null
+		return this.state.movie ? this._getMovieInfo() : this._getLoader()
+	},
+
+	_getLoader() {
+		return this.state.loading ? <div className='alert alert-info'>Loading...</div> : null
 	},
 
 	_getMovieInfo() {
-		var { Title, Year, imdbRating } = this.state.movie
+		let { Title, Director, Actors, Year, firebaseKey, imdbID, imdbRating, imdbVotes } = this.state.movie
 
 		return (
 			<article className='panel panel-default movie-info'>
-				<header className='panel-heading'>
-					<h1 className='panel-title movie-info__title'>{ Title }</h1>
-					<h2 className='movie-info__year'>{ Year }</h2>
-				</header>
-				<div className='panel-body'>
-					<h3 className='movie-info__imdb-rating'>{ imdbRating }</h3>
-
+				<h1 className='movie-info__title'>{ Title } - <span className='movie-info__year'>{ Year }</span></h1>
+				<h2 className='movie-info__director'>Director: { Director }</h2>
+				<div className='movie-info__body'>
+					<p className='alert alert-warning movie-info__imdb-rating'>IMDB rating { imdbRating } / votes { imdbVotes }</p>
+					<div className="panel panel-default">
+						<div className="panel-heading">
+							<h3 className="panel-title">Actors</h3>
+						</div>
+						<div className="panel-body">
+						{ Actors }
+						</div>
+					</div>
 					{ this._getButtonsGroup() }
-
 				</div>
 			</article>
 		)
@@ -70,7 +79,10 @@ export default React.createClass({
 	},
 
 	_onMoviesStoreChange() {
-		this.setState({ movie: this.store.getFoundMovie() })
+		this.setState({
+			movie: this.store.getFoundMovie(),
+			loading: this.store.isLoading()
+		})
 	}
 
 })
