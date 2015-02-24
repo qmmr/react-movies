@@ -4,17 +4,20 @@ import {
 	REMOVE_FAVORITE_MOVIE,
 	ADD_WATCH_LATER_MOVIE,
 	ADD_HATE_MOVIE,
-	QUERY_MOVIE
+	QUERY_MOVIE,
+	MOVIE_DATA,
+	NO_MOVIE_DATA,
+	OMDB_ERROR
 } from '../constants/actionTypes'
 import request from 'superagent'
 
 const CHANGE_EVENT = 'CHANGE_EVENT'
 
 export default class MoviesStore extends EventEmitter {
-	constructor(dispatcher, favoriteMoviesFBSvc) {
-		this._dispatchToken = dispatcher.register(this._handleAction.bind(this))
+	constructor(dispatcher, favoriteMoviesFBSvc, omdbSvc) {
+		this._dispatchToken = dispatcher.register(this.handleAction.bind(this))
 		this._favoriteMoviesFBSvc = favoriteMoviesFBSvc
-		this._OMDBI_URL = 'http://www.omdbapi.com/'
+		this._omdbSvc = omdbSvc
 		this._foundMovie = null
 		this._favoriteMovies = []
 		this._watchLaterMovies = []
@@ -56,29 +59,54 @@ export default class MoviesStore extends EventEmitter {
 		return this._loading
 	}
 
+	getLastRequest() {
+		return this._lastRequest
+	}
+
 	// private methods
 
-	_handleAction({ source, action: { type, data } }) {
-		switch (type) {
-			case ADD_FAVORITE_MOVIE:
-				this._addFavoriteMovie(data)
-				break
-			case ADD_WATCH_LATER_MOVIE:
-				this._addWatchLaterMovie(data)
-				break
-			case ADD_HATE_MOVIE:
-				this._addHateMovie(data)
-				break
-			case REMOVE_FAVORITE_MOVIE:
-				this._removeFavoriteMovie(data)
-				break
-			case QUERY_MOVIE:
-				this._queryMovie(data)
-				break
+	handleAction({ source, action: { type, data } }) {
+		if (source === 'SERVER_ACTION') {
+			switch (type) {
+				case MOVIE_DATA:
+					this._addFoundMovie(data)
+					this.emitChange()
+					break
+				case NO_MOVIE_DATA:
+					this._addNotFoundMovie(data)
+					this.emitChange()
+					break
+				case OMDB_ERROR:
+					console.log(data)
+					break
+			}
 		}
 
-		return true
+		if (source === 'VIEW_ACTION') {
+			switch (type) {
+				case ADD_FAVORITE_MOVIE:
+					this._addFavoriteMovie(data)
+					this.emitChange()
+					break
+				// case ADD_WATCH_LATER_MOVIE:
+				// 	this._addWatchLaterMovie(data)
+				// 	this.emitChange()
+				// 	break
+				// case ADD_HATE_MOVIE:
+				// 	this._addHateMovie(data)
+				// 	this.emitChange()
+				// 	break
+				case REMOVE_FAVORITE_MOVIE:
+					this._removeFavoriteMovie(data)
+					break
+				case QUERY_MOVIE:
+					this._queryMovie(data)
+					break
+			}
+		}
 	}
+
+	// private methods
 
 	_listenToFavoriteMoviesSvc() {
 		this._favoriteMoviesFBSvc.on('child_added', (dataSnapshot) => {
@@ -99,39 +127,23 @@ export default class MoviesStore extends EventEmitter {
 		this.emitChange()
 	}
 
-	_queryMovie(data) {
-		this._loading = true
-		this._lastRequest = request.get(this._OMDBI_URL)
-			.query({ t: data, plot: 'short', r: 'json' })
-			.on('error', (err) => {
-				if (err) {
-					console.error(`Oops, sorry: ${ err.message }`)
-					this._loading = false
-					this.emitChange()
-				}
-			})
-			.end((resp) => this._addQueriedMovie(resp.text))
-		this.emitChange()
+	_queryMovie(title) {
+		this._lastRequest = this._omdbSvc.queryMovie(title)
 	}
 
 	_addFavoriteMovie(movie) {
 		let favoriteMovieRef = this._favoriteMoviesFBSvc.push(movie)
-
 		movie.firebaseKey = favoriteMovieRef.key()
 		this._foundMovie = null
-
-		this.emitChange()
 	}
 
-	_addWatchLaterMovie(movie) {
-		// this._watchLaterMovies.push(movie)
-		// this.emitChange()
-	}
+	// _addWatchLaterMovie(movie) {
+	// 	this._watchLaterMovies.push(movie)
+	// }
 
-	_addHateMovie(movie) {
-		// this._hateMovies.push(movie)
-		// this.emitChange()
-	}
+	// _addHateMovie(movie) {
+	// 	this._hateMovies.push(movie)
+	// }
 
 	_removeFavoriteMovie(key) {
 		let movieRef = this._favoriteMoviesFBSvc.child(key)
@@ -145,12 +157,12 @@ export default class MoviesStore extends EventEmitter {
 		})
 	}
 
-	_addQueriedMovie(data) {
-		if (typeof data === 'string') {
-			this._foundMovie = JSON.parse(data)
-			this._loading = false
-			this.emitChange()
-		}
+	_addFoundMovie(data) {
+		this._foundMovie = data
+	}
+
+	_addNotFoundMovie(data) {
+		this._foundMovie = data
 	}
 
 }

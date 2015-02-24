@@ -4,7 +4,10 @@ import {
 	ADD_WATCH_LATER_MOVIE,
 	ADD_HATE_MOVIE,
 	REMOVE_FAVORITE_MOVIE,
-	QUERY_MOVIE
+	QUERY_MOVIE,
+	MOVIE_DATA,
+	NO_MOVIE_DATA,
+	OMDB_ERROR
 } from '../constants/actionTypes'
 
 export default function createActionCreators(appDispatcher) {
@@ -27,6 +30,18 @@ export default function createActionCreators(appDispatcher) {
 
 		queryMovie(data) {
 			appDispatcher.handleViewAction({ type: QUERY_MOVIE, data })
+		},
+
+		foundMovie(data) {
+			appDispatcher.handleServerAction({ type: MOVIE_DATA, data })
+		},
+
+		notFoundMovie(data) {
+			appDispatcher.handleServerAction({ type: NO_MOVIE_DATA, data })
+		},
+
+		handleOMDBError(data) {
+			appDispatcher.handleServerAction({ type: OMDB_ERROR, data })
 		}
 	}
 }
