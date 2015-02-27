@@ -1,21 +1,19 @@
 import React from 'react'
 import App from './components/App.jsx'
-import createActionCreators from './utils/createActionCreators'
-import createFirebaseService from './utils/createFirebaseService'
-import omdbService from './services/omdbService'
+import createActionCreators from './actions/createActionCreators'
+import getFirebaseService from './services/firebaseService'
+import getOMDBService from './services/omdbService'
 import AppDispatcher from './dispatcher/AppDispatcher'
 import MoviesStore from './stores/MoviesStore'
 
 var appDispatcher = new AppDispatcher()
 var actions = createActionCreators(appDispatcher)
-var favoriteMoviesFBSvc = createFirebaseService('https://favorite-movies.firebaseio.com/favorite-movies')
-var viewContext = {
-	moviesStore: new MoviesStore(appDispatcher, favoriteMoviesFBSvc, omdbService(actions)),
-	actions
-}
+var firebaseService = getFirebaseService(actions)
+var omdbService = getOMDBService(actions)
+var moviesStore = new MoviesStore(appDispatcher, firebaseService, omdbService)
 
 React.render(
-	React.withContext(viewContext, function() {
+	React.withContext({ moviesStore, actions }, function() {
 		return React.createFactory(App)(null)
 	}),
 	document.querySelector('#container')

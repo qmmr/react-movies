@@ -10,7 +10,7 @@ export default React.createClass({
 	getInitialState() {
 		return {
 			movie: null,
-			loading: false
+			queryInProgress: false
 		}
 	},
 
@@ -23,7 +23,29 @@ export default React.createClass({
 	},
 
 	_getLoader() {
-		return this.state.loading ? <div className='alert alert-info'>Loading...</div> : null
+		let preloaderHTML = `
+			<rect x="0" y="10" width="4" height="10" fill="#333" opacity="0.2">
+				<animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.6s" repeatCount="indefinite" />
+				<animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />
+				<animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />
+			</rect>
+			<rect x="8" y="10" width="4" height="10" fill="#333"  opacity="0.2">
+				<animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.6s" repeatCount="indefinite" />
+				<animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />
+				<animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />
+			</rect>
+			<rect x="16" y="10" width="4" height="10" fill="#333"  opacity="0.2">
+				<animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.6s" repeatCount="indefinite" />
+				<animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />
+				<animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />
+			</rect>`
+
+		return this.state.queryInProgress ? (
+			<div className="preloader">
+				<h3>Searching for movie...</h3>
+				<svg dangerouslySetInnerHTML={{ __html: preloaderHTML }}></svg>
+			</div>
+		) : null
 	},
 
 	_getMovieInfo() {
@@ -66,22 +88,10 @@ export default React.createClass({
 		this.actions.addFavoriteMovie(this.state.movie)
 	},
 
-	_addToWatchLaterMovies(e) {
-		e.preventDefault()
-		console.log('MARCIN :: _addToWatchLaterMovies ::')
-		this.actions.addWatchLaterMovie(this.state.movie)
-	},
-
-	_addToHateMovies(e) {
-		e.preventDefault()
-		console.log('MARCIN :: _addToHateMovies ::')
-		this.actions.addHateMovie(this.state.movie)
-	},
-
 	_onMoviesStoreChange() {
 		this.setState({
 			movie: this.store.getFoundMovie(),
-			loading: this.store.isLoading()
+			queryInProgress: this.store.isQueryInProgress()
 		})
 	}
 

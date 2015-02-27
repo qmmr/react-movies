@@ -10,7 +10,7 @@ export default React.createClass({
 	getInitialState() {
 		return {
 			query: '',
-			loading: this.store.isLoading()
+			queryInProgress: this.store.isQueryInProgress()
 		}
 	},
 
@@ -21,7 +21,7 @@ export default React.createClass({
 	submitHandler(e) {
 		e.preventDefault()
 
-		if (!this.state.loading) {
+		if (!this.state.queryInProgress) {
 			this.actions.queryMovie(this.state.query.trim())
 			this.setState({ query: '' })
 		}
@@ -37,13 +37,13 @@ export default React.createClass({
 							type='text'
 							className='form-control'
 							placeholder='Search for a movie...'
-							disabled={ this.state.loading && 'disabled' }
+							disabled={ this.state.queryInProgress && 'disabled' }
 							onChange={ this._updateQuery }
 							value={ this.state.query } />
 						<span className='input-group-btn'>
 							<button
 								className='btn btn-primary'
-								disabled={ this.state.loading && 'disabled' }
+								disabled={ this.state.queryInProgress && 'disabled' }
 								type='submit'>
 								Search
 							</button>
@@ -61,7 +61,7 @@ export default React.createClass({
 	},
 
 	_onMoviesStoreChange() {
-		this.setState({ loading: this.store.isLoading() })
+		this.setState({ queryInProgress: this.store.isQueryInProgress() })
 	}
 
 })

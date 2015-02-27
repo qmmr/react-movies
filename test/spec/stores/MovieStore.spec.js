@@ -1,7 +1,18 @@
 import MoviesStore from '../../../src/stores/MoviesStore'
+import { VIEW_ACTION, SERVER_ACTION } from '../../../src/constants/sourceTypes'
+import {
+	QUERY_MOVIE,
+	ADD_FAVORITE_MOVIE,
+	REMOVE_FAVORITE_MOVIE,
+	MOVIE_DATA,
+	NO_MOVIE_DATA
+} from '../../../src/constants/actionTypes'
+import { CHILD_ADDED, CHILD_REMOVED } from '../../../src/constants/firebaseTypes'
 import getMovieStub from '../../utils/getMovieStub'
+import objectAssign from 'object-assign'
 
 const MOVIE = getMovieStub()
+const FAKE_MOVIE = { firebaseKey: 'fake_key' }
 const MOVIE_REF_KEY = '-JiiDpEbWl4bQiWu7MpF'
 const NOT_FOUND_RESP = { Response: 'False', Error: 'Movie not found!' }
 const REQUEST_MOCK = {
@@ -25,15 +36,11 @@ var dispatcher = {
 	handleServerAction: sinon.stub()
 }
 
-var firebaseMovieRef = {
-	key: sinon.stub(),
-	remove: sinon.spy()
-}
-
-var firebaseSvc = {
+var firebaseService = {
 	on: sinon.spy(),
-	push: sinon.stub(),
-	child: sinon.stub()
+	addToFavoriteMovies: sinon.stub(),
+	removeFromFavoriteMovies: sinon.spy(),
+	listenToChildAdded: sinon.spy()
 }
 
 var omdbSvc = {
@@ -47,7 +54,7 @@ describe('Given an instance of the MoviesStore', function() {
 			var moviesStore
 
 			before(function() {
-				moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+				moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 			})
 
 			it('should return null', function() {
@@ -55,13 +62,13 @@ describe('Given an instance of the MoviesStore', function() {
 			})
 		})
 
-		describe('and the MOVIE_DATA have been dispatched', function() {
+		describe('and the "MOVIE_DATA" have been dispatched', function() {
 			var moviesStore
 
 			before(function() {
-				var payload = createPayload('SERVER_ACTION', 'MOVIE_DATA', MOVIE)
+				var payload = createPayload(SERVER_ACTION, MOVIE_DATA, MOVIE)
 
-				moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+				moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 				moviesStore.handleAction(payload)
 			})
 
@@ -70,13 +77,13 @@ describe('Given an instance of the MoviesStore', function() {
 			})
 		})
 
-		describe('and the NO_MOVIE_DATA have been dispatched', function() {
+		describe('and the "NO_MOVIE_DATA" have been dispatched', function() {
 			var moviesStore
 
 			before(function() {
-				var payload = createPayload('SERVER_ACTION', 'NO_MOVIE_DATA', NOT_FOUND_RESP)
+				var payload = createPayload(SERVER_ACTION, NO_MOVIE_DATA, NOT_FOUND_RESP)
 
-				moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+				moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 				moviesStore.handleAction(payload)
 			})
 
@@ -91,7 +98,7 @@ describe('Given an instance of the MoviesStore', function() {
 			var moviesStore
 
 			before(function() {
-				moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+				moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 			})
 
 			it('should return an empty array', function() {
@@ -106,7 +113,7 @@ describe('Given an instance of the MoviesStore', function() {
 		var moviesStore
 
 		beforeEach(function() {
-			moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+			moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 		})
 
 		it('should return true if the movie was found', function() {
@@ -119,13 +126,13 @@ describe('Given an instance of the MoviesStore', function() {
 		})
 	})
 
-	describe('when a MOVIE_DATA is dispatched', function() {
+	describe('when a "MOVIE_DATA" is dispatched', function() {
 		var moviesStore
 
 		before(function() {
-			var payload = createPayload('SERVER_ACTION', 'MOVIE_DATA', MOVIE)
+			var payload = createPayload(SERVER_ACTION, MOVIE_DATA, MOVIE)
 
-			moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+			moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 			sinon.spy(moviesStore, 'emitChange')
 			moviesStore.handleAction(payload)
 		})
@@ -140,13 +147,13 @@ describe('Given an instance of the MoviesStore', function() {
 		})
 	})
 
-	describe('when NO_MOVIE_DATA is dispatched', function() {
+	describe('when "NO_MOVIE_DATA" is dispatched', function() {
 		var moviesStore
 
 		before(function() {
-			var payload = createPayload('SERVER_ACTION', 'NO_MOVIE_DATA', NOT_FOUND_RESP)
+			var payload = createPayload(SERVER_ACTION, NO_MOVIE_DATA, NOT_FOUND_RESP)
 
-			moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+			moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 			sinon.spy(moviesStore, 'emitChange')
 			moviesStore.handleAction(payload)
 		})
@@ -155,20 +162,20 @@ describe('Given an instance of the MoviesStore', function() {
 			moviesStore.emitChange.restore()
 		})
 
-		it('should assign NOT_FOUND_RESP to foundMovie key', function() {
+		it('should assign "NOT_FOUND_RESP" to foundMovie key', function() {
 			expect(moviesStore.emitChange).to.be.calledOnce
 			expect(moviesStore.getFoundMovie()).to.deep.equal(NOT_FOUND_RESP)
 		})
 	})
 
-	describe('when a QUERY_MOVIE is dispatched', function() {
+	describe('when a "QUERY_MOVIE" is dispatched', function() {
 		var moviesStore
 
 		before(function() {
-			var payload = createPayload('VIEW_ACTION', 'QUERY_MOVIE', 'Filemon i Bonifacy')
+			var payload = createPayload(VIEW_ACTION, QUERY_MOVIE, 'Filemon i Bonifacy')
 
 			omdbSvc.queryMovie.withArgs('Filemon i Bonifacy').returns(REQUEST_MOCK)
-			moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+			moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 			sinon.spy(moviesStore, 'emitChange')
 			moviesStore.handleAction(payload)
 		})
@@ -181,20 +188,18 @@ describe('Given an instance of the MoviesStore', function() {
 			expect(omdbSvc.queryMovie)
 				.to.be.calledWith('Filemon i Bonifacy')
 				.and.to.be.calledOnce
-			expect(moviesStore.emitChange).to.not.be.called
+			expect(moviesStore.emitChange).to.be.called
 			expect(moviesStore.getLastRequest()).to.deep.equal(REQUEST_MOCK)
 		})
 	})
 
-	describe('when a ADD_FAVORITE_MOVIE is dispatched', function() {
+	describe('when a "ADD_FAVORITE_MOVIE" is dispatched', function() {
 		var moviesStore
 
 		before(function() {
-			var payload = createPayload('VIEW_ACTION', 'ADD_FAVORITE_MOVIE', MOVIE)
+			var payload = createPayload(VIEW_ACTION, ADD_FAVORITE_MOVIE, MOVIE)
 
-			firebaseSvc.push.withArgs(MOVIE).returns(firebaseMovieRef)
-			firebaseMovieRef.key.returns(MOVIE_REF_KEY)
-			moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+			moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 			sinon.spy(moviesStore, 'emitChange')
 			moviesStore.handleAction(payload)
 		})
@@ -203,24 +208,28 @@ describe('Given an instance of the MoviesStore', function() {
 			moviesStore.emitChange.restore()
 		})
 
-		it('should remove the movie from foundMovie property', function() {
-			expect(firebaseSvc.push)
+		it('should call the firebaseService.addToFavoriteMovies', function() {
+			expect(firebaseService.addToFavoriteMovies)
 				.to.be.calledOnce
 				.and.to.be.calledWithExactly(MOVIE)
-			expect(firebaseMovieRef.key).to.be.calledOnce
+		})
+
+		it('should remove the movie from foundMovie property', function() {
 			expect(moviesStore.getFoundMovie()).to.be.null
+		})
+
+		it('should emit change event', function() {
 			expect(moviesStore.emitChange).to.be.calledOnce
 		})
 	})
 
-	describe('when a REMOVE_FAVORITE_MOVIE is dispatched', function() {
+	describe('when a "REMOVE_FAVORITE_MOVIE" is dispatched', function() {
 		var moviesStore
 
 		before(function() {
-			var payload = createPayload('VIEW_ACTION', 'REMOVE_FAVORITE_MOVIE', MOVIE_REF_KEY)
+			var payload = createPayload(VIEW_ACTION, REMOVE_FAVORITE_MOVIE, MOVIE_REF_KEY)
 
-			firebaseSvc.child.withArgs(MOVIE_REF_KEY).returns(firebaseMovieRef)
-			moviesStore = new MoviesStore(dispatcher, firebaseSvc, omdbSvc)
+			moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
 			sinon.spy(moviesStore, 'emitChange')
 			moviesStore.handleAction(payload)
 		})
@@ -229,10 +238,57 @@ describe('Given an instance of the MoviesStore', function() {
 			moviesStore.emitChange.restore()
 		})
 
-		it('should remove the movie from foundMovie property', function() {
-			expect(firebaseSvc.child).to.be.calledOnce
-			expect(firebaseMovieRef.remove).to.be.calledOnce
+		it('should call removeFromFavoriteMovies method on firebaseService', function() {
+			expect(firebaseService.removeFromFavoriteMovies)
+				.to.be.calledOnce
+				.and.to.be.calledWith(MOVIE_REF_KEY)
 			expect(moviesStore.emitChange).to.not.be.called
+		})
+	})
+
+	describe('when a "CHILD_ADDED" is dispatched', function() {
+		var moviesStore, payload
+
+		before(function() {
+			payload = createPayload(SERVER_ACTION, CHILD_ADDED, MOVIE)
+
+			moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
+			sinon.spy(moviesStore, 'emitChange')
+		})
+
+		after(function() {
+			moviesStore.emitChange.restore()
+		})
+
+		it('should add the movie to favoriteMovies array', function() {
+			expect(moviesStore.getFavoriteMovies()).to.have.length(0)
+			moviesStore.handleAction(payload)
+			expect(moviesStore.getFavoriteMovies()).to.have.length(1)
+			expect(moviesStore.emitChange).to.be.calledOnce
+		})
+	})
+
+	describe('when a "CHILD_REMOVED" is dispatched', function() {
+		var movieWithKey = objectAssign(MOVIE, { firebaseKey: MOVIE_REF_KEY })
+		var moviesStore, payload
+
+		before(function() {
+			payload = createPayload(SERVER_ACTION, CHILD_REMOVED, MOVIE_REF_KEY)
+
+			moviesStore = new MoviesStore(dispatcher, firebaseService, omdbSvc)
+			sinon.spy(moviesStore, 'emitChange')
+		})
+
+		after(function() {
+			moviesStore.emitChange.restore()
+		})
+
+		it('should remove the movie from favoriteMovies array', function() {
+			moviesStore._favoriteMovies = [ FAKE_MOVIE, FAKE_MOVIE, MOVIE, FAKE_MOVIE, FAKE_MOVIE ]
+			expect(moviesStore.getFavoriteMovies()).to.have.length(5)
+			moviesStore.handleAction(payload)
+			expect(moviesStore.getFavoriteMovies()).to.have.length(4)
+			expect(moviesStore.emitChange).to.be.calledOnce
 		})
 	})
 })

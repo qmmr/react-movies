@@ -1,10 +1,8 @@
+import { OMDB_URL } from '../constants/constants'
 import request from 'superagent'
 import parseJSON from '../utils/parseJSON'
 
-export default function createOmdbService(actions) {
-	const OMDB_URL = 'http://www.omdbapi.com/'
-	const MOVIE_NOT_FOUND = 'Movie not found!'
-
+export default function omdbService(actions) {
 	var handleResponse = (resp) => {
 		let data = parseJSON(resp.text)
 
@@ -26,7 +24,8 @@ export default function createOmdbService(actions) {
 	return {
 
 		queryMovie(title) {
-			return request.get(OMDB_URL)
+			return request
+				.get(OMDB_URL)
 				.query({ t: title, plot: 'short', r: 'json' })
 				.accept('application/json')
 				.on('error', handleOMDBError)

@@ -2,29 +2,29 @@ import { EventEmitter } from 'events'
 import {
 	ADD_FAVORITE_MOVIE,
 	REMOVE_FAVORITE_MOVIE,
-	ADD_WATCH_LATER_MOVIE,
-	ADD_HATE_MOVIE,
+	// ADD_WATCH_LATER_MOVIE,
+	// ADD_HATE_MOVIE,
 	QUERY_MOVIE,
 	MOVIE_DATA,
 	NO_MOVIE_DATA,
 	OMDB_ERROR
 } from '../constants/actionTypes'
-import request from 'superagent'
+import { CHILD_ADDED, CHILD_REMOVED } from '../constants/firebaseTypes'
+import { VIEW_ACTION, SERVER_ACTION } from '../constants/sourceTypes'
 
 const CHANGE_EVENT = 'CHANGE_EVENT'
 
 export default class MoviesStore extends EventEmitter {
-	constructor(dispatcher, favoriteMoviesFBSvc, omdbSvc) {
+	constructor(dispatcher, firebaseService, omdbSvc) {
 		this._dispatchToken = dispatcher.register(this.handleAction.bind(this))
-		this._favoriteMoviesFBSvc = favoriteMoviesFBSvc
+		this._firebaseService = firebaseService
 		this._omdbSvc = omdbSvc
 		this._foundMovie = null
 		this._favoriteMovies = []
-		this._watchLaterMovies = []
-		this._hateMovies = []
+		this._queryInProgress = false
 		this._lastRequest = null
 
-		this._listenToFavoriteMoviesSvc()
+		this._firebaseService.on(CHILD_ADDED)
 
 		super()
 	}
@@ -55,8 +55,8 @@ export default class MoviesStore extends EventEmitter {
 		return this._favoriteMovies
 	}
 
-	isLoading() {
-		return this._loading
+	isQueryInProgress() {
+		return this._queryInProgress
 	}
 
 	getLastRequest() {
@@ -66,7 +66,7 @@ export default class MoviesStore extends EventEmitter {
 	// private methods
 
 	handleAction({ source, action: { type, data } }) {
-		if (source === 'SERVER_ACTION') {
+		if (source === SERVER_ACTION) {
 			switch (type) {
 				case MOVIE_DATA:
 					this._addFoundMovie(data)
@@ -79,27 +79,28 @@ export default class MoviesStore extends EventEmitter {
 				case OMDB_ERROR:
 					console.log(data)
 					break
+				case CHILD_ADDED:
+					this._addToFavoriteMoviesArray(data)
+					this.emitChange()
+					break
+				case CHILD_REMOVED:
+					this._removeFromFavoriteMoviesArray(data)
+					this.emitChange()
+					break
 			}
 		}
 
-		if (source === 'VIEW_ACTION') {
+		if (source === VIEW_ACTION) {
 			switch (type) {
 				case ADD_FAVORITE_MOVIE:
-					this._addFavoriteMovie(data)
+					this._pushFavoriteMovieToFirebase(data)
 					this.emitChange()
 					break
-				// case ADD_WATCH_LATER_MOVIE:
-				// 	this._addWatchLaterMovie(data)
-				// 	this.emitChange()
-				// 	break
-				// case ADD_HATE_MOVIE:
-				// 	this._addHateMovie(data)
-				// 	this.emitChange()
-				// 	break
 				case REMOVE_FAVORITE_MOVIE:
-					this._removeFavoriteMovie(data)
+					this._removeFavoriteMovieFromFirebase(data)
 					break
 				case QUERY_MOVIE:
+					this._foundMovie = null
 					this._queryMovie(data)
 					break
 			}
@@ -108,61 +109,45 @@ export default class MoviesStore extends EventEmitter {
 
 	// private methods
 
-	_listenToFavoriteMoviesSvc() {
-		this._favoriteMoviesFBSvc.on('child_added', (dataSnapshot) => {
-			let movie = dataSnapshot.val()
-			movie.firebaseKey = dataSnapshot.key()
-
-			this._favoriteMovies.push(movie)
-			this.emitChange()
-		})
-
-		this._favoriteMoviesFBSvc.on('child_removed', (dataSnapshot) => {
-			this._removeFromFavoriteMovies(dataSnapshot.key())
-		})
-	}
-
-	_removeFromFavoriteMovies(key) {
-		this._favoriteMovies = this._favoriteMovies.filter((movie) => movie.firebaseKey !== key)
+	_queryMovie(title) {
+		this._lastRequest = this._omdbSvc.queryMovie(title)
+		this._startQueryProgress()
 		this.emitChange()
 	}
 
-	_queryMovie(title) {
-		this._lastRequest = this._omdbSvc.queryMovie(title)
-	}
-
-	_addFavoriteMovie(movie) {
-		let favoriteMovieRef = this._favoriteMoviesFBSvc.push(movie)
-		movie.firebaseKey = favoriteMovieRef.key()
+	_pushFavoriteMovieToFirebase(movie) {
+		this._firebaseService.addToFavoriteMovies(movie)
 		this._foundMovie = null
 	}
 
-	// _addWatchLaterMovie(movie) {
-	// 	this._watchLaterMovies.push(movie)
-	// }
+	_removeFavoriteMovieFromFirebase(key) {
+		this._firebaseService.removeFromFavoriteMovies(key)
+	}
 
-	// _addHateMovie(movie) {
-	// 	this._hateMovies.push(movie)
-	// }
+	_addToFavoriteMoviesArray(movie) {
+		this._favoriteMovies.push(movie)
+	}
 
-	_removeFavoriteMovie(key) {
-		let movieRef = this._favoriteMoviesFBSvc.child(key)
-
-		movieRef.remove((err) => {
-			if (err) {
-				console.error(err)
-			} else {
-				console.log(`movie ${ key } was removed`)
-			}
-		})
+	_removeFromFavoriteMoviesArray(key) {
+		this._favoriteMovies = this._favoriteMovies.filter((movie) => movie.firebaseKey !== key)
 	}
 
 	_addFoundMovie(data) {
+		this._stopQueryProgress()
 		this._foundMovie = data
 	}
 
 	_addNotFoundMovie(data) {
+		this._stopQueryProgress()
 		this._foundMovie = data
+	}
+
+	_startQueryProgress() {
+		this._queryInProgress = true
+	}
+
+	_stopQueryProgress() {
+		this._queryInProgress = false
 	}
 
 }

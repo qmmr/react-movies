@@ -1,7 +1,5 @@
 import { Dispatcher } from 'flux'
-
-const VIEW_ACTION = 'VIEW_ACTION'
-const SERVER_ACTION = 'SERVER_ACTION'
+import { VIEW_ACTION, SERVER_ACTION } from '../constants/sourceTypes'
 
 export default class AppDispatcher extends Dispatcher {
 	constructor() {
