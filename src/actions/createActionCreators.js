@@ -10,6 +10,8 @@ import {
 	OMDB_ERROR
 } from '../constants/actionTypes'
 
+import { CHILD_ADDED, CHILD_REMOVED } from '../constants/firebaseTypes'
+
 export default function createActionCreators(appDispatcher) {
 	return {
 		addFavoriteMovie(data) {
@@ -42,6 +44,14 @@ export default function createActionCreators(appDispatcher) {
 
 		handleOMDBError(data) {
 			appDispatcher.handleServerAction({ type: OMDB_ERROR, data })
+		},
+
+		childAdded(data) {
+			appDispatcher.handleServerAction({ type: CHILD_ADDED, data })
+		},
+
+		childRemoved(data) {
+			appDispatcher.handleServerAction({ type: CHILD_REMOVED, data })
 		}
 	}
 }

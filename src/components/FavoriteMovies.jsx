@@ -46,14 +46,11 @@ export default React.createClass({
 		)
 	},
 
-	_getSpinner() {
-		return <span>Loading...</span>
-	},
-
 	_getTableRows() {
 		return (
 			this.state.movies.map((movie, idx) => {
 				let { Title, Director, Actors, Year, firebaseKey, imdbID, imdbRating, imdbVotes } = movie
+
 				return (
 					<tr key={ idx }>
 						<td><a href={ 'http://www.imdb.com/title/' + imdbID } target='_blank'>{ Title }</a></td>

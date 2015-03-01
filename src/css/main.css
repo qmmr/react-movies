@@ -1,3 +1,19 @@
 .search {
 	margin-bottom: 1em;
 }
+
+.preloader{
+	margin: 2em auto;
+	text-align: center;
+	width: 100%;
+}
+
+.preloader svg {
+	width: 20px;
+	height: 30px;
+}
+
+svg path,
+svg rect{
+  fill: #158CBA;
+}

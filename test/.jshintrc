@@ -6,7 +6,9 @@
 		"expect": true,
 		"it": true,
 		"before": true,
-		"beforeEach": true
+		"beforeEach": true,
+		"after": true,
+		"afterEach": true
 	},
 	"node": true,
 	"browser": true,
@@ -32,7 +34,7 @@
 	"debug": false,
 	"eqnull": false,
 	"evil": false,
-	"expr": false,
+	"expr": true,
 	"funcscope": false,
 	"iterator": false,
 	"lastsemic": true,
