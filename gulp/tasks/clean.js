@@ -15,7 +15,7 @@ gulp.task('clean:markup', function(done) {
 })
 
 gulp.task('clean:js', function(done) {
-	del([ config.browserify.dest + '/bundle.js' ], done)
+	del([ config.browserify.dest + '/bundle.js*' ], done)
 })
 gulp.task('clean:tmp', function(done) {
 	del([ '.tmp' ], done)
