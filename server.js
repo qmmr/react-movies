@@ -4,7 +4,8 @@ var express = require('express')
 var app = express()
 var bodyParser = require('body-parser')
 var path = require('path')
-var listen
+var PORT = process.env.PORT || 8000
+var HOST = process.env.HOST || 'localhost'
 
 app
 	.use(bodyParser.urlencoded({ extended: true }))
@@ -12,16 +13,8 @@ app
 	.get('/', function (req, res) {
 		res.sendFile(path.join(__dirname, 'index.html'))
 	})
-
-listen = exports.listen = function listen(port, host) {
-	app.listen(port, host, function() {
-		console.log('Express server is running on http://%s:%d ', host, port)
+	.listen(PORT, HOST, function() {
+		console.log('Express server is running on http://%s:%d ', HOST, PORT)
 	})
-}
 
-if (require.main === module) {
-	listen(
-		process.env.PORT || 8000,
-		process.env.HOST || "localhost"
-	)
-}
+
