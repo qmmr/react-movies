@@ -1,4 +1,4 @@
-https://travis-ci.org/qmmr/react-movies.svg?branch=master
+[![Build Status](https://travis-ci.org/qmmr/react-movies.svg?branch=master)](https://travis-ci.org/qmmr/react-movies)
 
 # FLUX/React.js movie rating app
 
