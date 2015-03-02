@@ -1,3 +1,5 @@
+https://travis-ci.org/qmmr/react-movies.svg?branch=master
+
 # FLUX/React.js movie rating app
 
 Simple FLUX/React.js movie app that can fetch data from OMDBI database and save it in a Firebase.
