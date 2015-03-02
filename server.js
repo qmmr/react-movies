@@ -5,7 +5,7 @@ var app = express()
 var bodyParser = require('body-parser')
 var path = require('path')
 var PORT = process.env.PORT || 8000
-var HOST = process.env.HOST || 'localhost'
+var HOST = process.env.HOST || '0.0.0.0'
 
 app
 	.use(bodyParser.urlencoded({ extended: true }))
