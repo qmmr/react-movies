@@ -9,6 +9,8 @@
   },
   "scripts": {
     "test": "node_modules/.bin/gulp test",
+    "test:continuous": "node_modules/.bin/gulp test:continuous",
+    "build": "node_modules/.bin/gulp build",
     "start": "node server.js",
     "serve": "node_modules/.bin/gulp serve",
     "postinstall": "node_modules/.bin/gulp build"
