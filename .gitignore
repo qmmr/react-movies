@@ -80,6 +80,7 @@ $RECYCLE.BIN/
 !.jscsrc*
 !.jshintrc
 !.jsxhintrc
+!.travis.yml
 *~
 
 # Node.js, bower etc
