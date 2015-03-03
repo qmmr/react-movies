@@ -5,10 +5,6 @@ const REQUEST_MOCK = {
 	method: 'GET',
 	url: 'http://www.omdbapi.com/?t=Filemon%20i%20Bonifacy&plot=short&r=json'
 }
-const OMDB_RESPONSE_OBJECT = {
-	text: '{"Title":"Filemon i Bonifacy"}',
-	type: 'text/html'
-}
 
 var actionsMock = {
 	foundMovie: sinon.spy(),
@@ -17,55 +13,93 @@ var actionsMock = {
 }
 
 describe('Given an instance of omdbService', function() {
-	var service
+	var service, xhr, requests
 
 	before(function() {
 		service = omdbService(actionsMock)
+
+		xhr = sinon.useFakeXMLHttpRequest()
+		xhr.onCreate = function(req) {
+			requests.push(req)
+		}
 	})
 
-	describe('when invoking the #queryMovie', function() {
-		var request
+	beforeEach(function() {
+		requests = []
+	})
 
-		before(function() {
-			request = service.queryMovie(MOVIE_TITLE)
+	after(function() {
+		xhr.restore()
+	})
+
+	describe('invoking the #queryMovie', function() {
+		it('should perform a `GET` request to specified endpoint', function() {
+			service.queryMovie(MOVIE_TITLE)
+
+			var [ request ] = requests
+
+			expect(requests).to.have.length(1)
+			expect(request).to.have.property('method', REQUEST_MOCK.method)
+			expect(request).to.have.property('url', REQUEST_MOCK.url)
 		})
 
-		it('should return a request object', function () {
-			var { method, url } = request
-
-			expect(method).to.equal(REQUEST_MOCK.method)
-			expect(url).to.equal(REQUEST_MOCK.url)
-		})
-
-		describe.skip('and response is a MOVIE_DATA', function() {
-			before(function() {
-				request = service.queryMovie(MOVIE_TITLE)
+		describe('and the response status is 200', function() {
+			beforeEach(function() {
+				requests = []
 			})
 
-			// after(function() {
-			// 	request.end.restore()
-			// })
+			describe('when the response.text has error "Movie not found!"', function() {
+				it('should invoke the actions#notFoundMovie method with expected data', function() {
+					const MOVIE_NOT_FOUND_RESPONSE = '{"Response":"False","Error":"Movie not found!"}'
+					const OMDB_RESPONSE_OBJECT = { Error: 'Movie not found!', Response: 'False' }
 
-			it('should call actions#foundMovie method with expected data', function(done) {
-				var handleResponseSpy = sinon.spy()
+					service.queryMovie(MOVIE_TITLE)
 
-				request.end(handleResponseSpy)
-				// handleResponseSpy((resp) => {
-				// 	expect(resp.text).to.be.be.a.string
-				// 	expect(resp.text).to.contain(MOVIE_TITLE)
-				// 	done()
-				// })
+					let [ request ] = requests
+					request.respond(200, { 'Content-Type': 'application/json' }, MOVIE_NOT_FOUND_RESPONSE)
 
-				// request.end(handleResponseSpy)
-				setTimeout(() => {
-					expect(actionsMock.foundMovie).to.be.calledOnce
-					// handleResponseSpy.callArgWith(0, OMDB_RESPONSE_OBJECT)
-				}, 1)
+					expect(actionsMock.notFoundMovie)
+						.to.be.calledOnce
+						.and.to.be.calledWith(OMDB_RESPONSE_OBJECT)
+				})
+			})
+
+			describe('when the response is a found movie', function() {
+				it('should invoke actions#foundMovie method with expected data', function() {
+					const OMDB_RESPONSE_STRING = '{"text":{"Title":"Filemon i Bonifacy"},"type":"text/html"}'
+					const OMDB_RESPONSE_OBJECT = { text: { Title: 'Filemon i Bonifacy' }, type: 'text/html' }
+
+					service.queryMovie(MOVIE_TITLE)
+
+					let [ request ] = requests
+					request.respond(200, { 'Content-Type': 'application/json' }, OMDB_RESPONSE_STRING)
+
+					expect(actionsMock.foundMovie)
+						.to.be.calledOnce
+						.and.to.be.calledWith(OMDB_RESPONSE_OBJECT)
+				})
 			})
 		})
+	})
 
-		// describe('and response is a NO_MOVIE_DATA', function() {
 
-		// })
+	describe('when #queryMovie is a failure', function() {
+		it('should invoke actions#foundMovie method with expected data', function() {
+			const ERROR = {
+				status: 500,
+				method: 'GET',
+				url: 'http://www.omdbapi.com/?t=Filemon%20i%20Bonifacy&plot=short&r=json'
+			}
+
+			service.queryMovie(MOVIE_TITLE)
+
+			let [ request ] = requests
+			request.respond(500, { 'Content-Type': 'text/plain' }, 'SERVER ERROR')
+
+			expect(requests).to.have.length(1)
+			expect(actionsMock.handleOMDBError)
+				.to.be.calledOnce
+				.and.to.be.calledWith()
+		})
 	})
 })

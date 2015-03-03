@@ -4,6 +4,10 @@ import parseJSON from '../utils/parseJSON'
 
 export default function omdbService(actions) {
 	var handleResponse = (resp) => {
+		if (resp.error) {
+			handleOMDBError(resp.error)
+		}
+
 		let data = parseJSON(resp.text)
 
 		if (data.Error) {
@@ -24,7 +28,7 @@ export default function omdbService(actions) {
 	return {
 
 		queryMovie(title) {
-			return request
+			request
 				.get(OMDB_URL)
 				.query({ t: title, plot: 'short', r: 'json' })
 				.accept('application/json')
