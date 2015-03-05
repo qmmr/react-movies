@@ -25,6 +25,7 @@ export default class MoviesStore extends EventEmitter {
 		this._lastRequest = null
 
 		this._firebaseService.on(CHILD_ADDED)
+		this._firebaseService.on(CHILD_REMOVED)
 
 		super()
 	}
